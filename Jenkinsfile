@@ -1,7 +1,12 @@
 pipeline {
-    agent any 
+    agent any
 
-    tools { 
+    def COLOR_MAP = [
+        'SUCCESS': 'good',
+        'FAILURE': 'danger'
+    ]
+
+    tools {
         maven 'mavenjenkins'
         jdk 'jenkinsjava'
     }
@@ -35,22 +40,29 @@ pipeline {
             }
         }
 
-
-stage('Sonar Scanner') {
-    steps {
-        withSonarQubeEnv('SonarQube') { 
-            sh 'mvn sonar:sonar -Dsonar.projectKey=GS -Dsonar.sources=src/main/java/com/kibernumacademy/miapp -Dsonar.tests=src/test/java/com/kibernumacademy/miapp -Dsonar.java.binaries=.'
-        }
-    }
-}
-
-        stage('Quality Gate'){
-            steps{
-                timeout(time:1, unit:'HOURS'){
-                    waitForQualityGate abortPipeline:true
+        stage('Sonar Scanner') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=GS -Dsonar.sources=src/main/java/com/kibernumacademy/miapp -Dsonar.tests=src/test/java/com/kibernumacademy/miapp -Dsonar.java.binaries=.'
                 }
             }
         }
 
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Slack Notification'
+            slackSend channel: '#el-mejor-equipo-devops-de-la-fshet',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: "*${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More Info at: ${env.BUILD_URL}"
+        }
     }
 }
