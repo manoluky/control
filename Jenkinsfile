@@ -1,12 +1,12 @@
-pipeline {
-    agent any
-    
-        // Definir el mapa de colores para la notificación de Slack
+ // Definir el mapa de colores para la notificación de Slack
     def COLOR_MAP = [
         'SUCCESS': 'good',
         'FAILURE': 'danger'
     ]
 
+pipeline {
+
+    agent any
     tools {
         maven 'mavenjenkins'
         jdk 'jenkinsjava'
