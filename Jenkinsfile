@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    def COLOR_MAP = [
-        'SUCCESS': 'good',
-        'FAILURE': 'danger'
-    ]
-
     tools {
         maven 'mavenjenkins'
         jdk 'jenkinsjava'
